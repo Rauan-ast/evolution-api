@@ -1,60 +1,28 @@
 services:
-  api:
-    container_name: evolution_api
-    image: evoapicloud/evolution-api:latest
-    restart: always
+  evolution-api:
+    image: ghcr.io/rauankz/evolution-api:latest
+    container_name: evolution-api
+    ports:
+      - "3000:3000"
     depends_on:
-      - redis
-      - postgres
-    ports:
-      - 8080:8080
-    volumes:
-      - evolution_instances:/evolution/instances
-    networks:
-      - evolution-net
-    environment:
-      - DATABASE_URL=postgresql://user:pass@postgres:5432/evolution
-      - REDIS_URL=redis://redis:6379
-    expose:
-      - 8080
-
-  redis:
-    image: redis:latest
-    networks:
-      - evolution-net
-    container_name: redis
-    command: >
-      redis-server --port 6379 --appendonly yes
-    volumes:
-      - evolution_redis:/data
-    ports:
-      - 6379:6379
-
-  postgres:
-    container_name: postgres
-    image: postgres:15
-    networks:
-      - evolution-net
-    command: ["postgres", "-c", "max_connections=1000", "-c", "listen_addresses=*"]
+      - evolution-postgres
     restart: always
-    ports:
-      - 5432:5432
     environment:
-      - POSTGRES_USER=user
-      - POSTGRES_PASSWORD=pass
-      - POSTGRES_DB=evolution
-      - POSTGRES_HOST_AUTH_METHOD=trust
+      - DATABASE_URL=postgresql://evolution_user:evolution_pass@evolution-postgres:5432/evolutiondb
     volumes:
-      - postgres_data:/var/lib/postgresql/data
-    expose:
-      - 5432
+      - evolution_data:/app
+
+  evolution-postgres:
+    image: postgres:16
+    container_name: evolution-postgres
+    restart: always
+    environment:
+      POSTGRES_USER: evolution_user
+      POSTGRES_PASSWORD: evolution_pass
+      POSTGRES_DB: evolutiondb
+    volumes:
+      - evolution_postgres_data:/var/lib/postgresql/data
 
 volumes:
-  evolution_instances:
-  evolution_redis:
-  postgres_data:
-
-networks:
-  evolution-net:
-    name: evolution-net
-    driver: bridge
+  evolution_postgres_data:
+  evolution_data:
