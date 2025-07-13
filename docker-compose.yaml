@@ -12,8 +12,9 @@ services:
       - evolution_instances:/evolution/instances
     networks:
       - evolution-net
-    env_file:
-      - .env
+    environment:
+      - DATABASE_URL=postgresql://user:pass@postgres:5432/evolution
+      - REDIS_URL=redis://redis:6379
     expose:
       - 8080
 
@@ -52,7 +53,6 @@ volumes:
   evolution_instances:
   evolution_redis:
   postgres_data:
-
 
 networks:
   evolution-net:
